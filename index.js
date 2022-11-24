@@ -4,7 +4,7 @@ const port = process.env.PORT || 7000;
 const app = express();
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 // Middleware
 app.use(cors())
@@ -25,6 +25,25 @@ async function run() {
 
 
 
+        //  jwt verify funtion 
+        function verifyJWT(req, res, next) {
+
+            const authHeader = req.headers.authorization;
+            if (!authHeader) {
+                return res.ststus(401).send({ accessToken: 'Unauthorized Access' });
+            }
+            const token = authHeader.split(' ')[1];
+            jwt.verify(token, process.env.ACCESS_TOKEN, function (err, decoded) {
+                if (err) {
+                    return res.ststus(403).send({ message: 'Forbidden Access' });
+                }
+                req.decoded = decoded;
+                next();
+            })
+
+        }
+
+
         // user create add in db
         app.post('/users', async (req, res) => {
             const user = req.body;
@@ -33,8 +52,17 @@ async function run() {
 
         })
 
-        //jwt token
+        // user get from db
+        app.get('/users', verifyJWT, async (req, res) => {
 
+            const query = {};
+            const users = await usersCollection.find(query).toArray();
+            res.send(users);
+
+        })
+
+
+        //jwt token
         app.get('/jwt', async (req, res) => {
             const email = req.query.email;
             const query = { email: email }
@@ -44,6 +72,48 @@ async function run() {
                 return res.send({ accessToken: token });
             }
             res.ststus(403).send({ accessToken: 'token invalid' });
+        })
+
+        // admin validation api 
+        app.get('/users/admin/:email', async (req, res) => {
+            const email = req.params.email;
+            const filter = { email };
+            const user = await usersCollection.findOne(filter);
+            res.send({ isAdmin: user?.role === 'admin' })
+        })
+
+
+        // seller validation api 
+        app.get('/users/seller/:email', async (req, res) => {
+            const email = req.params.email;
+            const filter = { email };
+            const user = await usersCollection.findOne(filter);
+            res.send({ isAdmin: user?.seller === true })
+        })
+
+
+        //Make Admin API
+        app.put('/users/admin/:id', verifyJWT, async (req, res) => {
+            console.log(req.headers.authorization)
+            const decodedEmail = req.decoded.email;
+            const query = { email: decodedEmail };
+            const user = await usersCollection.findOne(query);
+            if (user.role !== 'admin') {
+                return res.ststus(403).send({ message: 'Forbidden Access' });
+            }
+
+
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) }
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: {
+                    role: 'admin'
+                }
+            }
+            const result = await usersCollection.updateOne(filter, updateDoc, options);
+            res.send(result);
+
         })
 
     }
