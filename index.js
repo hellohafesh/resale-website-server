@@ -88,7 +88,7 @@ async function run() {
             const email = req.params.email;
             const filter = { email };
             const user = await usersCollection.findOne(filter);
-            res.send({ isAdmin: user?.seller === true })
+            res.send({ isSeller: user?.seller === true })
         })
 
 
