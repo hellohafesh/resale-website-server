@@ -54,7 +54,6 @@ async function run() {
 
         // user get from db
         app.get('/users', verifyJWT, async (req, res) => {
-
             const query = {};
             const users = await usersCollection.find(query).toArray();
             res.send(users);
@@ -92,6 +91,17 @@ async function run() {
         })
 
 
+
+        // get all seller   
+        app.get('/allseller', async (req, res) => {
+            const filter = { seller: true };
+            const user = await usersCollection.find(filter).toArray();
+            res.send(user);
+        })
+
+
+
+
         //Make Admin API
         app.put('/users/admin/:id', verifyJWT, async (req, res) => {
             console.log(req.headers.authorization)
@@ -101,8 +111,6 @@ async function run() {
             if (user.role !== 'admin') {
                 return res.ststus(403).send({ message: 'Forbidden Access' });
             }
-
-
             const id = req.params.id;
             const filter = { _id: ObjectId(id) }
             const options = { upsert: true };
