@@ -99,8 +99,21 @@ async function run() {
             res.send(user);
         })
 
+        //get all only users 
+        app.get('/onlyusers', async (req, res) => {
+            const query = { seller: false };
+            const users = await usersCollection.find(query).toArray();
+            res.send(users);
 
+        })
 
+        //delete a user 
+        app.delete('/userdelete/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const result = await usersCollection.deleteOne(filter);
+            res.send(result);
+        })
 
         //Make Admin API
         app.put('/users/admin/:id', verifyJWT, async (req, res) => {
