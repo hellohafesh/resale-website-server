@@ -59,6 +59,13 @@ async function run() {
             const result = await productCollection.insertOne(product);
             res.send(result);
         })
+        //get product from db with matching uid
+        app.get('/products/:uid', async (req, res) => {
+            const uid = req.params.uid;
+            const query = { uid: uid };
+            const products = await productCollection.find(query).toArray();
+            res.send(products);
+        })
 
         // user get from db
         app.get('/users', verifyJWT, async (req, res) => {
@@ -120,6 +127,15 @@ async function run() {
             const id = req.params.id;
             const filter = { _id: ObjectId(id) };
             const result = await usersCollection.deleteOne(filter);
+            res.send(result);
+        })
+
+
+        //delete a product 
+        app.delete('/products/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const result = await productCollection.deleteOne(filter);
             res.send(result);
         })
 
