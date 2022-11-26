@@ -59,6 +59,15 @@ async function run() {
             const result = await productCollection.insertOne(product);
             res.send(result);
         })
+
+
+        //get all product from db
+        app.get('/products', async (req, res) => {
+            const query = {};
+            const products = await productCollection.find(query).toArray();
+            res.send(products);
+        })
+
         //get product from db with matching uid
         app.get('/products/:uid', async (req, res) => {
             const uid = req.params.uid;
@@ -66,6 +75,8 @@ async function run() {
             const products = await productCollection.find(query).toArray();
             res.send(products);
         })
+
+
 
         // user get from db
         app.get('/users', verifyJWT, async (req, res) => {
