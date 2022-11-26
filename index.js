@@ -22,6 +22,7 @@ async function run() {
     try {
 
         const usersCollection = client.db('poridhan').collection('users');
+        const productCollection = client.db('poridhan').collection('product');
 
 
 
@@ -50,6 +51,13 @@ async function run() {
             const result = await usersCollection.insertOne(user);
             res.send(result);
 
+        })
+
+        //Add product Api 
+        app.post('/addproduct', async (req, res) => {
+            const product = req.body;
+            const result = await productCollection.insertOne(product);
+            res.send(result);
         })
 
         // user get from db
