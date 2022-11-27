@@ -10,25 +10,19 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 app.use(cors())
 app.use(express.json())
 
-
-
-
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.s3uhktq.mongodb.net/?retryWrites=true&w=majority`;
 
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
-
 async function run() {
     try {
-
         const usersCollection = client.db('poridhan').collection('users');
         const productCollection = client.db('poridhan').collection('product');
-
-
+        const adveticeCollection = client.db('poridhan').collection('advetice');
+        const bookingCollection = client.db('poridhan').collection('booking');
 
         //  jwt verify funtion 
         function verifyJWT(req, res, next) {
-
             const authHeader = req.headers.authorization;
             if (!authHeader) {
                 return res.ststus(401).send({ accessToken: 'Unauthorized Access' });
@@ -44,13 +38,11 @@ async function run() {
 
         }
 
-
         // user create add in db
         app.post('/users', async (req, res) => {
             const user = req.body;
             const result = await usersCollection.insertOne(user);
             res.send(result);
-
         })
 
         //Add product Api 
@@ -61,10 +53,43 @@ async function run() {
         })
 
 
+        //Add Buying product Api 
+        app.post('/addbooking', async (req, res) => {
+            const product = req.body;
+            const result = await bookingCollection.insertOne(product);
+            res.send(result);
+        })
+
+
+        //Add advetice Api
+        app.post('/advetice', async (req, res) => {
+            const product = req.body;
+            const result = await adveticeCollection.insertOne(product);
+            res.send(result);
+        })
+
         //get all product from db
-        app.get('/products', async (req, res) => {
+        app.get('/products/:category', async (req, res) => {
+            const category = req.params.category;
+            console.log(category)
+
+            const filter = {};
+            if (category == "all") {
+                const products = await productCollection.find(filter).toArray();
+                res.send(products,);
+            }
+
+            else {
+                const query = { category: category };
+                const products = await productCollection.find(query).toArray();
+                res.send(products,);
+            }
+        })
+
+        //Add advetice Api
+        app.get('/advetice', async (req, res) => {
             const query = {};
-            const products = await productCollection.find(query).toArray();
+            const products = await adveticeCollection.find(query).toArray();
             res.send(products);
         })
 
@@ -77,15 +102,22 @@ async function run() {
         })
 
 
+        //get  booking product from db with matching uid
+        app.get('/booked/:uid', async (req, res) => {
+            const uid = req.params.uid;
+            // console.log(uid)
+            const query = { buyerUid: uid };
+            const booked = await bookingCollection.find(query).toArray();
+            res.send(booked);
+        })
+
 
         // user get from db
         app.get('/users', verifyJWT, async (req, res) => {
             const query = {};
             const users = await usersCollection.find(query).toArray();
             res.send(users);
-
         })
-
 
         //jwt token
         app.get('/jwt', async (req, res) => {
@@ -116,8 +148,6 @@ async function run() {
             res.send({ isSeller: user?.seller === true })
         })
 
-
-
         // get all seller   
         app.get('/allseller', async (req, res) => {
             const filter = { seller: true };
@@ -130,7 +160,6 @@ async function run() {
             const query = { seller: false };
             const users = await usersCollection.find(query).toArray();
             res.send(users);
-
         })
 
         //delete a user 
@@ -140,7 +169,6 @@ async function run() {
             const result = await usersCollection.deleteOne(filter);
             res.send(result);
         })
-
 
         //delete a product 
         app.delete('/products/:id', async (req, res) => {
@@ -169,10 +197,9 @@ async function run() {
             }
             const result = await usersCollection.updateOne(filter, updateDoc, options);
             res.send(result);
-
         })
-
     }
+
     finally {
 
     }
