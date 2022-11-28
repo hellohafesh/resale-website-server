@@ -260,6 +260,21 @@ async function run() {
             res.send(result);
         })
 
+        //////
+        app.put('/users/verifide/:id', async (req, res) => {
+            const id = req.params.id;
+            console.log(id)
+            const filter = { email: id };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: {
+                    verifide: "true",
+                }
+            }
+            const result = await usersCollection.updateOne(filter, updateDoc, options);
+            res.send(result);
+        })
+
         //Make Admin API
         app.put('/users/admin/:id', verifyJWT, async (req, res) => {
             console.log(req.headers.authorization)
@@ -280,6 +295,28 @@ async function run() {
             const result = await usersCollection.updateOne(filter, updateDoc, options);
             res.send(result);
         })
+
+        // app.put('/users/verifide/:id', verifyJWT, async (req, res) => {
+        //     console.log(req.headers.authorization)
+        //     const decodedEmail = req.decoded.email;
+        //     const email = req.params.id;
+        //     console.log(decodedEmail)
+        //     const query = { email: decodedEmail };
+        //     const user = await usersCollection.findOne(query);
+        //     if (user.role !== 'admin') {
+        //         return res.ststus(403).send({ message: 'Forbidden Access' });
+        //     }
+        //     const id = req.params.id;
+        //     const filter = { _id: ObjectId(id) }
+        //     const options = { upsert: true };
+        //     const updateDoc = {
+        //         $set: {
+        //             verifide: 'true'
+        //         }
+        //     }
+        //     const result = await usersCollection.updateOne(filter, updateDoc, options);
+        //     res.send(result);
+        // })
     }
 
     finally {
