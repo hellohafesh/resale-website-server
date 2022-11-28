@@ -68,23 +68,42 @@ async function run() {
             res.send(result);
         })
 
+
+
         //get all product from db
         app.get('/products/:category', async (req, res) => {
             const category = req.params.category;
             console.log(category)
 
-            const filter = {};
-            if (category == "all") {
+            const filter = { booking: 'false' };
+            if (category === "all") {
                 const products = await productCollection.find(filter).toArray();
                 res.send(products,);
             }
 
             else {
                 const query = { category: category };
-                const products = await productCollection.find(query).toArray();
-                res.send(products,);
+                const products = await productCollection.find(query, filter).toArray();
+                res.send(products);
             }
         })
+
+
+        app.get('/totalproducts', async (req, res) => {
+            const filter = {};
+            const products = await productCollection.find(filter).toArray();
+            res.send(products,);
+
+        })
+
+        //get all advetice from db
+        app.get('/adds', async (req, res) => {
+            const filter = { addvertise: 'true', booking: 'false' };
+            const addvertise = await productCollection.find(filter).toArray();
+            res.send(addvertise);
+
+        })
+
 
         //Add advetice Api
         app.get('/advetice', async (req, res) => {
@@ -94,7 +113,7 @@ async function run() {
         })
 
         //get product from db with matching uid
-        app.get('/products/:uid', async (req, res) => {
+        app.get('/myproducts/:uid', async (req, res) => {
             const uid = req.params.uid;
             const query = { uid: uid };
             const products = await productCollection.find(query).toArray();
@@ -162,6 +181,16 @@ async function run() {
             res.send(users);
         })
 
+        // get reported items
+        app.get('/report', async (req, res) => {
+            const query = { report: "true" };
+            const product = await productCollection.find(query).toArray();
+            res.send(product);
+        })
+
+
+
+
         //delete a user 
         app.delete('/userdelete/:id', async (req, res) => {
             const id = req.params.id;
@@ -175,6 +204,59 @@ async function run() {
             const id = req.params.id;
             const filter = { _id: ObjectId(id) };
             const result = await productCollection.deleteOne(filter);
+            res.send(result);
+        })
+
+
+        // bokking a product
+        app.put('/bookproducts/:id', async (req, res) => {
+            const id = req.params.id;
+
+            console.log(id)
+            const filter = { _id: ObjectId(id) };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: {
+                    booking: 'true',
+                }
+            }
+            const result = await productCollection.updateOne(filter, updateDoc, options);
+            res.send(result);
+        })
+
+
+
+        // addvertise a product
+        app.put('/adds/:id', async (req, res) => {
+            const id = req.params.id;
+            console.log(id)
+            const filter = { _id: ObjectId(id) };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: {
+                    addvertise: 'true',
+                }
+            }
+            const result = await productCollection.updateOne(filter, updateDoc, options);
+            res.send(result);
+        })
+
+
+
+
+
+        // report a product
+        app.put('/report/:id', async (req, res) => {
+            const id = req.params.id;
+            console.log(id)
+            const filter = { _id: ObjectId(id) };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: {
+                    report: 'true',
+                }
+            }
+            const result = await productCollection.updateOne(filter, updateDoc, options);
             res.send(result);
         })
 
