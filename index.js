@@ -75,22 +75,22 @@ async function run() {
             const category = req.params.category;
             console.log(category)
 
-            const filter = { booking: 'false' };
+            const filter = { booking: "false" };
             if (category === "all") {
                 const products = await productCollection.find(filter).toArray();
                 res.send(products,);
             }
 
             else {
-                const query = { category: category };
-                const products = await productCollection.find(query, filter).toArray();
+                const query = { category: category, booking: "false" };
+                const products = await productCollection.find(query).toArray();
                 res.send(products);
             }
         })
 
 
         app.get('/totalproducts', async (req, res) => {
-            const filter = {};
+            const filter = { booking: "false" };
             const products = await productCollection.find(filter).toArray();
             res.send(products,);
 
@@ -98,7 +98,7 @@ async function run() {
 
         //get all advetice from db
         app.get('/adds', async (req, res) => {
-            const filter = { addvertise: 'true', booking: 'false' };
+            const filter = { addvertise: 'true', booking: "false" };
             const addvertise = await productCollection.find(filter).toArray();
             res.send(addvertise);
 
@@ -217,7 +217,7 @@ async function run() {
             const options = { upsert: true };
             const updateDoc = {
                 $set: {
-                    booking: 'true',
+                    booking: "true",
                 }
             }
             const result = await productCollection.updateOne(filter, updateDoc, options);
@@ -234,7 +234,7 @@ async function run() {
             const options = { upsert: true };
             const updateDoc = {
                 $set: {
-                    addvertise: 'true',
+                    addvertise: "true",
                 }
             }
             const result = await productCollection.updateOne(filter, updateDoc, options);
@@ -253,7 +253,7 @@ async function run() {
             const options = { upsert: true };
             const updateDoc = {
                 $set: {
-                    report: 'true',
+                    report: "true",
                 }
             }
             const result = await productCollection.updateOne(filter, updateDoc, options);
